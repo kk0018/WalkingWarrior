@@ -5,21 +5,23 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
   <title>Walking Warrior</title>
   <style>
+    /* Stop the bounce and keep everything rigid */
     html, body { 
         width: 100%; height: 100%; margin: 0; padding: 0;
-        font-family: 'Segoe UI', sans-serif; 
-        background: #0a0a0a; color: white; 
+        background: #0a0a0a; color: white; font-family: sans-serif;
         overflow: hidden; display: flex; flex-direction: column;
     }
     
+    /* Stats Bar - Fixed 40px */
     #header {
-        height: 50px; display: flex; justify-content: space-between; align-items: center;
-        padding: 0 15px; background: #121212; border-bottom: 1px solid #333; flex-shrink: 0;
+        height: 40px; display: flex; justify-content: space-between; align-items: center;
+        padding: 0 15px; background: #111; border-bottom: 2px solid #333;
     }
 
+    /* Game World - Fixed 250px */
     #game-container { 
-        position: relative; height: 35vh; background: #1a1a2e; 
-        overflow: hidden; border-bottom: 4px solid #333; flex-shrink: 0;
+        position: relative; height: 250px; background: #1a1a2e; 
+        overflow: hidden; border-bottom: 4px solid #444;
     }
     
     .layer { 
@@ -33,7 +35,7 @@
     .tree-v2 { background: #3a7a33; height: 120px; }
     .tree-v3 { background: #1e3d24; height: 70px; }
 
-    #warrior-sprite { width: 45px; height: 65px; position: absolute; bottom: 15px; left: 50px; z-index: 999; }
+    #warrior-sprite { width: 45px; height: 65px; position: absolute; bottom: 15px; left: 50px; z-index: 99; }
     .pixel-head { width: 22px; height: 22px; background: #e0ac69; margin: 0 auto; border: 2px solid #000; }
     .pixel-body { width: 32px; height: 28px; background: #4a90e2; margin: -2px auto; border: 2px solid #000; }
     .pixel-feet { display: flex; justify-content: space-around; width: 32px; margin: 0 auto; }
@@ -42,29 +44,31 @@
     .bob { animation: bobbing 0.2s infinite alternate; }
     @keyframes bobbing { from { transform: translateY(0); } to { transform: translateY(-12px); } }
 
+    /* UI Panel - Fixed height to ensure buttons stay visible */
     #ui-panel { 
-        flex-grow: 1; display: flex; flex-direction: column; 
-        padding: 10px; background: #121212; overflow: hidden;
+        flex: 1; display: flex; flex-direction: column; padding: 10px; background: #121212;
     }
 
+    /* Log Box - It will fill the gap but NOT push buttons */
     #log { 
-        flex-grow: 1; background: #000; padding: 12px; border-radius: 8px; 
-        font-size: 14px; color: #aaa; overflow-y: auto; border: 1px solid #333;
+        flex: 1; background: #000; padding: 10px; border-radius: 5px; 
+        font-size: 14px; color: #888; overflow-y: scroll; border: 1px solid #333;
         margin-bottom: 10px;
     }
     
-    .btn-container { display: flex; flex-direction: column; gap: 8px; flex-shrink: 0; padding-bottom: 5px; }
-    button { width: 100%; padding: 16px; font-weight: bold; border-radius: 10px; border: none; cursor: pointer; font-size: 16px; }
+    /* Buttons - Fixed heights */
+    .btn-container { display: flex; flex-direction: column; gap: 8px; }
+    button { height: 55px; font-weight: bold; border-radius: 8px; border: none; font-size: 16px; }
     #motionBtn { background: #2196F3; color: white; }
     #stepBtn { background: #4CAF50; color: white; }
-    #resetBtn { background: #ff5252; color: white; width: auto; padding: 6px 12px; font-size: 12px; }
+    #resetBtn { background: #ff5252; color: white; height: 30px; padding: 0 10px; font-size: 12px; }
   </style>
 </head>
 <body>
 
   <div id="header">
     <div style="color:#4CAF50; font-weight:bold;">Steps: <span id="steps">0</span> | Pwr: <span id="power">14</span></div>
-    <button id="resetBtn" onclick="resetAdventure()">RESTART</button>
+    <button id="resetBtn">RESTART</button>
   </div>
 
   <div id="game-container">
@@ -78,10 +82,10 @@
   </div>
 
   <div id="ui-panel">
-    <div id="log"><div>> Adventure awaits...</div></div>
+    <div id="log"><div>> Ready to walk...</div></div>
     <div class="btn-container">
-        <button id="motionBtn">ENABLE MOTION SENSORS</button>
-        <button id="stepBtn">MANUAL STEP (TEST)</button>
+        <button id="motionBtn">ENABLE SENSORS</button>
+        <button id="stepBtn">MANUAL STEP</button>
     </div>
   </div>
 
