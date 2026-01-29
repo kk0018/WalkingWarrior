@@ -4,8 +4,7 @@ let lastStepTime = 0;
 function createWorld() {
     const trees = document.getElementById('tree-layer');
     const mtns = document.getElementById('mtn-layer');
-    trees.innerHTML = '';
-    mtns.innerHTML = '';
+    trees.innerHTML = ''; mtns.innerHTML = '';
     for (let i = 0; i < 200; i++) {
         let t = document.createElement('div');
         t.className = `tree tree-v${(i % 3) + 1}`;
@@ -20,7 +19,7 @@ function createWorld() {
 
 function handleStep() {
     state.steps++;
-    state.dist += 75;
+    state.dist += 70;
     document.getElementById('steps').innerText = state.steps;
     document.getElementById('tree-layer').style.transform = `translateX(-${state.dist}px)`;
     document.getElementById('mtn-layer').style.transform = `translateX(-${state.dist * 0.3}px)`;
@@ -31,30 +30,15 @@ function handleStep() {
 
     const log = document.getElementById('log');
     let entry = document.createElement('div');
-    if (state.steps % 10 === 0) {
-        state.power += 2;
-        document.getElementById('power').innerText = state.power;
-        entry.style.color = "gold";
-        entry.innerText = `> STEP ${state.steps}: Found Rare Loot!`;
-    } else {
-        entry.innerText = `> Step ${state.steps} taken.`;
-    }
+    entry.innerText = `> Step ${state.steps} recorded.`;
     log.prepend(entry);
 }
 
-// Fixed Global Reset Function
-window.resetAdventure = function() {
-    if(confirm("Restart adventure? This clears your steps!")) {
-        state = { steps: 0, power: 14, dist: 0 };
-        document.getElementById('steps').innerText = "0";
-        document.getElementById('power').innerText = "14";
-        document.getElementById('log').innerHTML = "<div>> Journey Reset.</div>";
-        document.getElementById('tree-layer').style.transform = `translateX(0px)`;
-        document.getElementById('mtn-layer').style.transform = `translateX(0px)`;
-    }
+document.getElementById('resetBtn').onclick = () => {
+    if(confirm("Restart?")) location.reload();
 };
 
-document.getElementById('motionBtn').addEventListener('click', () => {
+document.getElementById('motionBtn').onclick = () => {
     if (typeof DeviceMotionEvent !== 'undefined' && typeof DeviceMotionEvent.requestPermission === 'function') {
         DeviceMotionEvent.requestPermission().then(permission => {
             if (permission === 'granted') startTracking();
@@ -62,26 +46,20 @@ document.getElementById('motionBtn').addEventListener('click', () => {
     } else {
         startTracking();
     }
-});
+};
 
 function startTracking() {
     document.getElementById('motionBtn').style.display = 'none';
     window.addEventListener('devicemotion', (e) => {
         let acc = e.accelerationIncludingGravity;
-        if (!acc) return;
-
-        // Calculate the "Force" of the movement
         let total = Math.sqrt(acc.x**2 + acc.y**2 + acc.z**2);
         let now = Date.now();
-
-        // 15 is a firmer threshold for a real step. 
-        // 700ms cooldown ensures they can't "vibrate" the phone for steps.
-        if (total > 15 && (now - lastStepTime) > 700) {
+        if (total > 13 && (now - lastStepTime) > 700) {
             lastStepTime = now;
             handleStep();
         }
     });
 }
 
-document.getElementById('stepBtn').addEventListener('click', handleStep);
+document.getElementById('stepBtn').onclick = handleStep;
 createWorld();
