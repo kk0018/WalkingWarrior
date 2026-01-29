@@ -1,98 +1,68 @@
-let state = { steps: 0, power: 14, gear: { head: 1, chest: 1, gloves: 1, boots: 1 }, distance: 0, motionEnabled: false };
+let state = { steps: 0, power: 14, dist: 0 };
 let lastStepTime = 0;
 
-const log = (msg, isSpecial = false) => {
-    const logDiv = document.getElementById('log');
-    const entry = document.createElement('div');
-    if (isSpecial) entry.style.color = "#ffeb3b";
-    entry.innerText = `> ${msg}`;
-    logDiv.prepend(entry);
-};
-
-const buildEnvironment = () => {
-    const bg = document.getElementById('bg-back');
-    bg.innerHTML = '';
-    const isForest = state.steps < 20;
-    for (let i = 0; i < 150; i++) {
-        const el = document.createElement('div');
-        if (isForest) el.className = 'tree ' + (Math.random() > 0.5 ? 'tree-variant-1' : 'tree-variant-2');
-        else el.className = 'mountain ' + (Math.random() > 0.5 ? 'mtn-variant-1' : 'mtn-variant-2');
-        bg.appendChild(el);
+function createWorld() {
+    const trees = document.getElementById('tree-layer');
+    const mtns = document.getElementById('mtn-layer');
+    
+    for (let i = 0; i < 100; i++) {
+        let t = document.createElement('div');
+        t.className = `tree tree-v${(i % 3) + 1}`;
+        trees.appendChild(t);
+        
+        if (i % 3 === 0) {
+            let m = document.createElement('div');
+            m.className = 'mountain';
+            mtns.appendChild(m);
+        }
     }
-};
+}
 
-const updateUI = () => {
-    document.getElementById('steps').innerText = state.steps;
-    document.getElementById('power').innerText = state.power;
-    document.getElementById('progress-bar').style.width = ((state.steps % 5) * 20) + "%";
-    document.getElementById('bg-back').style.transform = `translateX(-${state.distance}px)`;
-};
-
-const saveGame = () => {
-    localStorage.setItem('warriorState', JSON.stringify(state));
-};
-
-const handleStep = () => {
+function handleStep() {
     state.steps++;
-    state.distance += 45;
-    const s = document.getElementById('warrior-sprite');
-    s.classList.add('walking-anim');
-    setTimeout(() => s.classList.remove('walking-anim'), 300);
-    if (state.steps === 20) { log("Entering the Mountains!", true); buildEnvironment(); }
-    if (state.steps % 5 === 0) {
-        const enemy = Math.floor(Math.random() * (state.steps / 2)) + 5;
-        if (state.power >= enemy) { log(`Defeated Enemy (Str ${enemy})`); rollLoot(); }
-        else { log(`Enemy too strong!`); state.steps--; state.distance -= 45; }
-    }
-    updateUI();
-    saveGame();
-};
+    state.dist += 40;
+    
+    document.getElementById('steps').innerText = state.steps;
+    // Parallax effect: trees move faster than mountains
+    document.getElementById('tree-layer').style.transform = `translateX(-${state.dist}px)`;
+    document.getElementById('mtn-layer').style.transform = `translateX(-${state.dist * 0.3}px)`;
+    
+    const sprite = document.getElementById('warrior-sprite');
+    sprite.classList.add('bob');
+    setTimeout(() => sprite.classList.remove('bob'), 300);
 
-const rollLoot = () => {
-    const slots = ['head', 'chest', 'gloves', 'boots'];
-    const s = slots[Math.floor(Math.random() * 4)];
-    const lvl = Math.floor(Math.random() * (state.steps / 3)) + 1;
-    if (lvl > state.gear[s]) {
-        log(`UPGRADE: Lv ${lvl} ${s}!`, true);
-        state.gear[s] = lvl;
-        state.power = 10 + Object.values(state.gear).reduce((a, b) => a + b, 0);
+    const log = document.getElementById('log');
+    if (state.steps % 10 === 0) {
+        log.innerHTML = `<div style="color:gold">> Found loot! Power increased!</div>` + log.innerHTML;
+        state.power += 2;
+        document.getElementById('power').innerText = state.power;
+    } else {
+        log.innerHTML = `<div>> Step ${state.steps} taken.</div>` + log.innerHTML;
     }
-};
+}
 
-// Motion Request for iOS/Android Browsers
-const requestMotion = () => {
+document.getElementById('motionBtn').addEventListener('click', () => {
     if (typeof DeviceMotionEvent.requestPermission === 'function') {
-        DeviceMotionEvent.requestPermission().then(permissionState => {
-            if (permissionState === 'granted') startMotion();
+        DeviceMotionEvent.requestPermission().then(permission => {
+            if (permission === 'granted') startTracking();
         });
     } else {
-        startMotion();
+        startTracking();
     }
-};
+});
 
-const startMotion = () => {
-    state.motionEnabled = true;
-    log("Walking Mode Active!");
-    window.addEventListener('devicemotion', (event) => {
-        const acc = event.accelerationIncludingGravity;
-        const force = Math.sqrt(acc.x**2 + acc.y**2 + acc.z**2);
-        const now = Date.now();
-        if (force > 13 && (now - lastStepTime) > 600) { 
+function startTracking() {
+    document.getElementById('motionBtn').style.display = 'none';
+    window.addEventListener('devicemotion', (e) => {
+        let acc = e.accelerationIncludingGravity;
+        let total = Math.sqrt(acc.x**2 + acc.y**2 + acc.z**2);
+        let now = Date.now();
+        if (total > 13 && (now - lastStepTime) > 700) {
             lastStepTime = now;
             handleStep();
         }
     });
-};
+}
 
-document.addEventListener('DOMContentLoaded', () => {
-    const saved = localStorage.getItem('warriorState');
-    if (saved) state = JSON.parse(saved);
-    buildEnvironment();
-    updateUI();
-    document.getElementById('stepBtn').addEventListener('click', handleStep);
-    document.getElementById('motionBtn').addEventListener('click', requestMotion);
-    document.getElementById('resetBtn').addEventListener('click', () => {
-        localStorage.removeItem('warriorState');
-        location.reload();
-    });
-});
+document.getElementById('stepBtn').addEventListener('click', handleStep);
+createWorld();
