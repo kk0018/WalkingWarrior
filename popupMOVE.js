@@ -1,81 +1,39 @@
-let state = { steps: 0, power: 14, dist: 0 };
-let lastStepTime = 0;
+// New state to track real-world position
+let state = { steps: 0, power: 14, dist: 0, lat: null, lon: null };
 
-function createWorld() {
-    const trees = document.getElementById('tree-layer');
-    const mtns = document.getElementById('mtn-layer');
-    trees.innerHTML = '';
-    mtns.innerHTML = '';
-    for (let i = 0; i < 200; i++) {
-        let t = document.createElement('div');
-        t.className = `tree tree-v${(i % 3) + 1}`;
-        trees.appendChild(t);
-        if (i % 6 === 0) {
-            let m = document.createElement('div');
-            m.className = 'mountain';
-            mtns.appendChild(m);
-        }
+// 1. Get User Location
+function startGPS() {
+    if ("geolocation" in navigator) {
+        navigator.geolocation.watchPosition((position) => {
+            state.lat = position.coords.latitude;
+            state.lon = position.coords.longitude;
+            
+            // Check if user is near a "Quest Item"
+            checkProximityToItems(state.lat, state.lon);
+            
+            document.getElementById('log').prepend(
+                document.createElement('div').innerText = `> GPS: ${state.lat.toFixed(4)}, ${state.lon.toFixed(4)}`
+            );
+        }, (err) => {
+            console.error("GPS Error", err);
+        }, { enableHighAccuracy: true });
     }
 }
 
-function handleStep() {
-    state.steps++;
-    state.dist += 75;
-    document.getElementById('steps').innerText = state.steps;
-    document.getElementById('tree-layer').style.transform = `translateX(-${state.dist}px)`;
-    document.getElementById('mtn-layer').style.transform = `translateX(-${state.dist * 0.3}px)`;
+// 2. Proximity Logic (Simple version)
+function checkProximityToItems(userLat, userLon) {
+    // Example: A "Magic Well" at a specific spot in Cedar Rapids
+    const itemLat = 41.9779; 
+    const itemLon = -91.6656;
     
-    const sprite = document.getElementById('warrior-sprite');
-    sprite.classList.add('bob');
-    setTimeout(() => sprite.classList.remove('bob'), 300);
-
-    const log = document.getElementById('log');
-    let entry = document.createElement('div');
-    if (state.steps % 10 === 0) {
-        state.power += 2;
+    // Calculate distance (very simplified)
+    const dLat = Math.abs(userLat - itemLat);
+    const dLon = Math.abs(userLon - itemLon);
+    
+    if (dLat < 0.0001 && dLon < 0.0001) {
+        const log = document.getElementById('log');
+        log.innerHTML = `<div style="color:cyan; font-weight:bold;">> YOU FOUND THE MAGIC WELL! +10 Power</div>` + log.innerHTML;
+        state.power += 10;
         document.getElementById('power').innerText = state.power;
-        entry.style.color = "gold";
-        entry.innerText = `> STEP ${state.steps}: Found Rare Loot!`;
-    } else {
-        entry.innerText = `> Step ${state.steps} taken.`;
     }
-    log.prepend(entry);
 }
-
-// Reset Function
-document.getElementById('resetBtn').addEventListener('click', () => {
-    if(confirm("Restart adventure? This clears your steps!")) {
-        state = { steps: 0, power: 14, dist: 0 };
-        document.getElementById('steps').innerText = "0";
-        document.getElementById('power').innerText = "14";
-        document.getElementById('log').innerHTML = "<div>> Journey Reset.</div>";
-        document.getElementById('tree-layer').style.transform = `translateX(0px)`;
-        document.getElementById('mtn-layer').style.transform = `translateX(0px)`;
-    }
-});
-
-document.getElementById('motionBtn').addEventListener('click', () => {
-    if (typeof DeviceMotionEvent !== 'undefined' && typeof DeviceMotionEvent.requestPermission === 'function') {
-        DeviceMotionEvent.requestPermission().then(permission => {
-            if (permission === 'granted') startTracking();
-        });
-    } else {
-        startTracking();
-    }
-});
-
-function startTracking() {
-    document.getElementById('motionBtn').style.display = 'none';
-    window.addEventListener('devicemotion', (e) => {
-        let acc = e.accelerationIncludingGravity;
-        let total = Math.sqrt(acc.x**2 + acc.y**2 + acc.z**2);
-        let now = Date.now();
-        if (total > 13 && (now - lastStepTime) > 700) {
-            lastStepTime = now;
-            handleStep();
-        }
-    });
-}
-
-document.getElementById('stepBtn').addEventListener('click', handleStep);
-createWorld();
