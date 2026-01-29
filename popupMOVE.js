@@ -42,8 +42,8 @@ function handleStep() {
     log.prepend(entry);
 }
 
-// Fixed Global Reset Function
-window.resetAdventure = function() {
+// Reset Function
+document.getElementById('resetBtn').addEventListener('click', () => {
     if(confirm("Restart adventure? This clears your steps!")) {
         state = { steps: 0, power: 14, dist: 0 };
         document.getElementById('steps').innerText = "0";
@@ -52,7 +52,7 @@ window.resetAdventure = function() {
         document.getElementById('tree-layer').style.transform = `translateX(0px)`;
         document.getElementById('mtn-layer').style.transform = `translateX(0px)`;
     }
-};
+});
 
 document.getElementById('motionBtn').addEventListener('click', () => {
     if (typeof DeviceMotionEvent !== 'undefined' && typeof DeviceMotionEvent.requestPermission === 'function') {
@@ -68,15 +68,9 @@ function startTracking() {
     document.getElementById('motionBtn').style.display = 'none';
     window.addEventListener('devicemotion', (e) => {
         let acc = e.accelerationIncludingGravity;
-        if (!acc) return;
-
-        // Calculate the "Force" of the movement
         let total = Math.sqrt(acc.x**2 + acc.y**2 + acc.z**2);
         let now = Date.now();
-
-        // 15 is a firmer threshold for a real step. 
-        // 700ms cooldown ensures they can't "vibrate" the phone for steps.
-        if (total > 15 && (now - lastStepTime) > 700) {
+        if (total > 13 && (now - lastStepTime) > 700) {
             lastStepTime = now;
             handleStep();
         }
