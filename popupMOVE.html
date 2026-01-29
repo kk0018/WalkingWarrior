@@ -3,98 +3,67 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-  <title>Walking Warrior MOVE</title>
+  <title>Walking Warrior</title>
   <style>
     body { 
-        width: 100%; 
-        max-width: 360px; 
-        margin: auto; 
-        font-family: 'Segoe UI', Tahoma, sans-serif; 
-        background: #121212; 
-        color: white; 
-        padding: 15px; 
-        box-sizing: border-box;
+        width: 100%; margin: 0; padding: 0;
+        font-family: 'Segoe UI', sans-serif; 
+        background: #0a0a0a; color: white; 
+        overflow: hidden; display: flex; flex-direction: column; height: 100vh;
     }
-    .header-row { display: flex; justify-content: space-between; align-items: center; margin-bottom: 10px; }
-    .stat-row { font-weight: bold; color: #4CAF50; font-size: 1.1em; }
     
-    #env-container {
-        height: 140px; 
-        position: relative; 
-        background: #1a1a2e;
-        margin-bottom: 15px; 
-        border-radius: 8px; 
-        border: 2px solid #333; 
-        overflow: hidden;
-    }
-
-    .bg-layer {
-        position: absolute; 
-        width: 1000%; 
-        height: 100%; 
-        top: 0; left: 0;
-        transition: transform 0.4s ease-out; 
-        display: flex; 
-        align-items: flex-end;
-    }
-
-    /* Forest Region (Steps 0-19) */
-    .tree { width: 35px; margin-right: 40px; border-radius: 20px 20px 0 0; border: 1px solid #051a11; }
-    .tree-v1 { background: linear-gradient(#2d5a27, #1b4d3e); height: 70px; }
-    .tree-v2 { background: linear-gradient(#3a7a33, #1e3d24); height: 95px; }
-
-    /* Mountain Region (Steps 20+) */
-    .mountain { width: 140px; clip-path: polygon(50% 0%, 0% 100%, 100% 100%); margin-right: -10px; }
-    .mtn-v1 { background: linear-gradient(#5d5d5d, #2c2c2c); height: 80px; }
-    .mtn-v2 { background: linear-gradient(#4a4e69, #22223b); height: 110px; }
-
-    #warrior-sprite { width: 30px; height: 45px; position: absolute; bottom: 15px; left: 40px; z-index: 10; }
-    .pixel-head { width: 18px; height: 18px; background: #e0ac69; margin: 0 auto; border: 2px solid #333; }
-    .pixel-body { width: 26px; height: 22px; background: #4a90e2; margin: -2px auto; border: 2px solid #333; }
-    .pixel-feet { display: flex; justify-content: space-around; width: 26px; margin: 0 auto; }
-    .foot { width: 10px; height: 8px; background: #333; border: 1px solid #000; }
-
-    .walking-anim { animation: bob 0.25s infinite alternate; }
-    @keyframes bob { from { transform: translateY(0); } to { transform: translateY(-10px); } }
-
-    .progress-container { background: #333; height: 12px; border-radius: 6px; margin-bottom: 15px; overflow: hidden; border: 1px solid #444; }
-    #progress-bar { width: 0%; height: 100%; background: #4CAF50; transition: width 0.3s ease; }
+    #game-container { position: relative; height: 300px; background: #1a1a2e; overflow: hidden; border-bottom: 4px solid #333; }
     
-    #log { height: 120px; background: #000; border: 1px solid #333; overflow-y: auto; padding: 10px; font-size: 13px; margin-bottom: 15px; border-radius: 6px; color: #aaa; }
+    /* Background Layers */
+    .layer { position: absolute; bottom: 0; left: 0; width: 1000%; height: 100%; display: flex; align-items: flex-end; transition: transform 0.3s ease-out; }
     
-    .controls { display: flex; flex-direction: column; gap: 10px; }
-    button { width: 100%; padding: 16px; background: #4CAF50; border: none; color: white; font-weight: bold; cursor: pointer; border-radius: 8px; font-size: 16px; }
-    button:active { background: #3d8b41; transform: scale(0.98); }
-    #motionBtn { background: #2196F3; }
-    #resetBtn { color: #ff5252; font-size: 12px; background: none; border: none; width: auto; text-decoration: underline; padding: 5px; }
+    /* Mountains (Slow movement) */
+    .mountain { width: 200px; height: 150px; background: #2d2d44; clip-path: polygon(50% 0%, 0% 100%, 100% 100%); margin-right: -50px; opacity: 0.6; }
     
-    .special { color: #ffeb3b; font-weight: bold; }
-    .battle { color: #ff5252; font-weight: bold; }
+    /* Trees (Faster movement) */
+    .tree { width: 40px; margin-right: 60px; border-radius: 20px 20px 0 0; position: relative; }
+    .tree-v1 { background: #2d5a27; height: 80px; }
+    .tree-v2 { background: #3a7a33; height: 110px; }
+    .tree-v3 { background: #1e3d24; height: 60px; }
+
+    #warrior-sprite { width: 40px; height: 60px; position: absolute; bottom: 20px; left: 50px; z-index: 100; }
+    .pixel-head { width: 20px; height: 20px; background: #e0ac69; margin: 0 auto; border: 2px solid #000; }
+    .pixel-body { width: 30px; height: 25px; background: #4a90e2; margin: -2px auto; border: 2px solid #000; }
+    .pixel-feet { display: flex; justify-content: space-around; width: 30px; margin: 0 auto; }
+    .foot { width: 12px; height: 8px; background: #333; }
+
+    .bob { animation: bobbing 0.2s infinite alternate; }
+    @keyframes bobbing { from { transform: translateY(0); } to { transform: translateY(-8px); } }
+
+    #ui-panel { padding: 15px; flex-grow: 1; display: flex; flex-direction: column; gap: 10px; background: #121212; }
+    .stats { font-size: 1.2rem; font-weight: bold; color: #4CAF50; display: flex; justify-content: space-between; }
+    #log { flex-grow: 1; background: #000; padding: 10px; border-radius: 5px; font-size: 14px; color: #aaa; overflow-y: auto; border: 1px solid #333; }
+    
+    button { width: 100%; padding: 15px; font-weight: bold; border-radius: 8px; border: none; cursor: pointer; font-size: 16px; }
+    #motionBtn { background: #2196F3; color: white; }
+    #stepBtn { background: #4CAF50; color: white; margin-top: 5px; }
   </style>
 </head>
 <body>
 
-  <div class="header-row">
-    <div class="stat-row">Steps: <span id="steps">0</span> | Pwr: <span id="power">14</span></div>
-    <button id="resetBtn">Restart Journey</button>
-  </div>
-
-  <div id="env-container">
-    <div id="bg-back" class="bg-layer"></div>
+  <div id="game-container">
+    <div id="mtn-layer" class="layer"></div>
+    <div id="tree-layer" class="layer"></div>
     <div id="warrior-sprite">
       <div class="pixel-head"></div>
-      <div id="sprite-body" class="pixel-body"></div>
+      <div class="pixel-body"></div>
       <div class="pixel-feet"><div class="foot"></div><div class="foot"></div></div>
     </div>
   </div>
 
-  <div class="progress-container"><div id="progress-bar"></div></div>
-
-  <div id="log">Welcome, Walking Warrior...</div>
-
-  <div class="controls">
-    <button id="motionBtn">ENABLE WALKING MODE</button>
-    <button id="stepBtn">SIMULATE STEP</button>
+  <div id="ui-panel">
+    <div class="stats">
+        <span>Steps: <span id="steps">0</span></span>
+        <span>Power: <span id="power">14</span></span>
+    </div>
+    <div id="log">Sensors ready... Walk to begin!</div>
+    <button id="motionBtn">ENABLE MOTION SENSORS</button>
+    <button id="stepBtn">MANUAL STEP (TEST)</button>
   </div>
 
   <script src="popupMOVE.js"></script>
