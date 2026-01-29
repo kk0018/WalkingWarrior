@@ -5,30 +5,26 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
   <title>Walking Warrior</title>
   <style>
-    /* LOCK THE VIEWPORT */
     html, body { 
         width: 100%; height: 100%; margin: 0; padding: 0;
         font-family: 'Segoe UI', sans-serif; 
         background: #0a0a0a; color: white; 
-        overflow: hidden; /* No bouncing/scrolling */
-        display: flex; flex-direction: column;
+        overflow: hidden; display: flex; flex-direction: column;
     }
     
-    /* THE WORLD: LOCKED AT 40% HEIGHT */
+    #header {
+        height: 50px; display: flex; justify-content: space-between; align-items: center;
+        padding: 0 15px; background: #121212; border-bottom: 1px solid #333; flex-shrink: 0;
+    }
+
     #game-container { 
-        position: relative; 
-        height: 40vh; 
-        background: #1a1a2e; 
-        overflow: hidden; 
-        border-bottom: 4px solid #333;
-        flex-shrink: 0; /* Prevents the log from squishing this */
+        position: relative; height: 35vh; background: #1a1a2e; 
+        overflow: hidden; border-bottom: 4px solid #333; flex-shrink: 0;
     }
     
     .layer { 
-        position: absolute; bottom: 0; left: 0; 
-        width: 10000px; /* Huge world width */
-        height: 100%; display: flex; align-items: flex-end; 
-        transition: transform 0.4s ease-out; 
+        position: absolute; bottom: 0; left: 0; width: 10000px; height: 100%; 
+        display: flex; align-items: flex-end; transition: transform 0.4s ease-out; 
     }
     
     .mountain { width: 240px; height: 160px; background: #2d2d44; clip-path: polygon(50% 0%, 0% 100%, 100% 100%); margin-right: -40px; opacity: 0.5; }
@@ -37,7 +33,6 @@
     .tree-v2 { background: #3a7a33; height: 120px; }
     .tree-v3 { background: #1e3d24; height: 70px; }
 
-    /* WARRIOR MUST BE ON TOP */
     #warrior-sprite { width: 45px; height: 65px; position: absolute; bottom: 15px; left: 50px; z-index: 999; }
     .pixel-head { width: 22px; height: 22px; background: #e0ac69; margin: 0 auto; border: 2px solid #000; }
     .pixel-body { width: 32px; height: 28px; background: #4a90e2; margin: -2px auto; border: 2px solid #000; }
@@ -47,38 +42,30 @@
     .bob { animation: bobbing 0.2s infinite alternate; }
     @keyframes bobbing { from { transform: translateY(0); } to { transform: translateY(-12px); } }
 
-    /* THE PANEL: LOCKED AT 60% HEIGHT */
     #ui-panel { 
-        height: 60vh; 
-        padding: 15px; 
-        display: flex; 
-        flex-direction: column; 
-        gap: 12px; 
-        background: #121212; 
-        box-sizing: border-box;
+        flex-grow: 1; display: flex; flex-direction: column; 
+        padding: 10px; background: #121212; overflow: hidden;
     }
 
-    .stats { font-size: 1.3rem; font-weight: bold; color: #4CAF50; display: flex; justify-content: space-between; flex-shrink: 0; }
-    
-    /* THE LOG: NOW HAS A FIXED SCROLL AREA */
     #log { 
-        flex-grow: 1; /* Fills the remaining 60% space */
-        background: #000; 
-        padding: 12px; 
-        border-radius: 8px; 
-        font-size: 14px; 
-        color: #aaa; 
-        overflow-y: auto; /* Internal scrolling only! */
-        border: 1px solid #333; 
+        flex-grow: 1; background: #000; padding: 12px; border-radius: 8px; 
+        font-size: 14px; color: #aaa; overflow-y: auto; border: 1px solid #333;
+        margin-bottom: 10px;
     }
     
-    .btn-container { display: flex; flex-direction: column; gap: 8px; flex-shrink: 0; }
-    button { width: 100%; padding: 18px; font-weight: bold; border-radius: 10px; border: none; cursor: pointer; font-size: 16px; }
+    .btn-container { display: flex; flex-direction: column; gap: 8px; flex-shrink: 0; padding-bottom: 5px; }
+    button { width: 100%; padding: 16px; font-weight: bold; border-radius: 10px; border: none; cursor: pointer; font-size: 16px; }
     #motionBtn { background: #2196F3; color: white; }
     #stepBtn { background: #4CAF50; color: white; }
+    #resetBtn { background: #ff5252; color: white; width: auto; padding: 6px 12px; font-size: 12px; }
   </style>
 </head>
 <body>
+
+  <div id="header">
+    <div style="color:#4CAF50; font-weight:bold;">Steps: <span id="steps">0</span> | Pwr: <span id="power">14</span></div>
+    <button id="resetBtn" onclick="resetAdventure()">RESTART</button>
+  </div>
 
   <div id="game-container">
     <div id="mtn-layer" class="layer"></div>
@@ -91,11 +78,7 @@
   </div>
 
   <div id="ui-panel">
-    <div class="stats">
-        <span>Steps: <span id="steps">0</span></span>
-        <span>Power: <span id="power">14</span></span>
-    </div>
-    <div id="log"><div>> Ready for departure, Warrior.</div></div>
+    <div id="log"><div>> Adventure awaits...</div></div>
     <div class="btn-container">
         <button id="motionBtn">ENABLE MOTION SENSORS</button>
         <button id="stepBtn">MANUAL STEP (TEST)</button>
