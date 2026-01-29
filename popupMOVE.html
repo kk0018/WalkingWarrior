@@ -12,13 +12,11 @@
         overflow: hidden; display: flex; flex-direction: column;
     }
     
-    /* Top Header for Stats & Reset */
     #header {
         height: 50px; display: flex; justify-content: space-between; align-items: center;
         padding: 0 15px; background: #121212; border-bottom: 1px solid #333; flex-shrink: 0;
     }
 
-    /* THE WORLD: FIXED SIZE */
     #game-container { 
         position: relative; height: 35vh; background: #1a1a2e; 
         overflow: hidden; border-bottom: 4px solid #333; flex-shrink: 0;
@@ -44,7 +42,6 @@
     .bob { animation: bobbing 0.2s infinite alternate; }
     @keyframes bobbing { from { transform: translateY(0); } to { transform: translateY(-12px); } }
 
-    /* UI PANEL: TAKES REMAINING SPACE */
     #ui-panel { 
         flex-grow: 1; display: flex; flex-direction: column; 
         padding: 10px; background: #121212; overflow: hidden;
@@ -56,7 +53,6 @@
         margin-bottom: 10px;
     }
     
-    /* BUTTONS: LOCKED TO THE BOTTOM */
     .btn-container { display: flex; flex-direction: column; gap: 8px; flex-shrink: 0; padding-bottom: 5px; }
     button { width: 100%; padding: 16px; font-weight: bold; border-radius: 10px; border: none; cursor: pointer; font-size: 16px; }
     #motionBtn { background: #2196F3; color: white; }
@@ -68,7 +64,7 @@
 
   <div id="header">
     <div style="color:#4CAF50; font-weight:bold;">Steps: <span id="steps">0</span> | Pwr: <span id="power">14</span></div>
-    <button id="resetBtn">RESTART</button>
+    <button id="resetBtn" onclick="resetAdventure()">RESTART</button>
   </div>
 
   <div id="game-container">
